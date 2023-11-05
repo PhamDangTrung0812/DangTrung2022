@@ -16,6 +16,10 @@ function getCart() {
 	return JSON.parse(json || "[]");
 }
 
+function removeAllCart() {
+	window.localStorage.removeItem(CART_KEY);
+}
+
 function storeCart(carts) {
 	window.localStorage.setItem(CART_KEY, JSON.stringify(carts));
 }
@@ -27,66 +31,71 @@ function renderCart(carts) {
 		.map(
 			(cart, index) => `
 		<div class="card-body p-4">
-		<div class="row align-items-center">
-			<div class="col-md-2">
-				<img
-					src="${cart.img}"
-					class="img-fluid"
-					alt="Generic placeholder image"
-				/>
-			</div>
-			<div
-				class="col-md-2 d-flex justify-content-center"
-			>
-				<div>
-					<p class="lead fw-normal mb-0">
-						${cart.name}
-					</p>
+			<div class="row align-items-center">
+				<div class="col-md-2">
+					<img
+						src="${cart.img}"
+						class="img-fluid"
+						alt="Generic placeholder image"
+					/>
 				</div>
-			</div>
-			
-			<div
-				class="col-md-2 d-flex justify-content-center"
-			>
-				<div>
-					<p class="lead fw-normal mb-0">${cart.quantity}</p>
+				<div
+					class="col-md-2 d-flex justify-content-center"
+				>
+					<div>
+						<p class="lead fw-normal mb-0">
+							${cart.name}
+						</p>
+					</div>
 				</div>
-			</div>
-			<div
-				class="col-md-2 d-flex justify-content-center"
-			>
-				<div>
-					<p class="lead fw-normal mb-0">
-						${$formatter.format(cart.price)}
-					</p>
+				
+				<div
+					class="col-md-2 d-flex justify-content-center"
+				>
+					<div>
+						<p class="lead fw-normal mb-0">${cart.quantity}</p>
+					</div>
 				</div>
-			</div>
-			<div
-				class="col-md-2 d-flex justify-content-center"
-			>
-				<div>
-					
-					<p class="lead fw-normal mb-0">
-						${$formatter.format(cart.quantity * cart.price)}
-					</p>
+				<div
+					class="col-md-2 d-flex justify-content-center"
+				>
+					<div>
+						<p class="lead fw-normal mb-0">
+							${$formatter.format(cart.price)}
+						</p>
+					</div>
 				</div>
-			</div>
-			<div
-				class="col-md-2 d-flex justify-content-center"
-			>
-				<button class="btn btn-danger" onclick="deleteCart('${index}')">Xóa</button>
+				<div
+					class="col-md-2 d-flex justify-content-center"
+				>
+					<div>
+						
+						<p class="lead fw-normal mb-0">
+							${$formatter.format(cart.quantity * cart.price)}
+						</p>
+					</div>
+				</div>
+				<div
+					class="col-md-2 d-flex justify-content-center"
+				>
+					<button class="btn btn-danger" onclick="deleteCart('${index}')">Xóa</button>
+				</div>
 			</div>
 		</div>
-	</div>
-	`,
+		`,
 		)
 		.join("");
 
 	cartContainerDOM.innerHTML = templates;
-	const totalPrice = carts.reduce((total, cur) => {
+	const totalPrice = calTotalPrice(carts);
+	totalPriceDOM.textContent =
+		$formatter.format(totalPrice).substring(1) + "đ";
+}
+
+function calTotalPrice(carts) {
+	return carts.reduce((total, cur) => {
 		return total + cur.quantity * cur.price;
 	}, 0);
-	totalPriceDOM.textContent = $formatter.format(totalPrice);
 }
 
 function renderCartItemsList(carts) {
@@ -102,8 +111,8 @@ function renderCartItemsList(carts) {
 						<h5 class="header__cart-item-name">${cart.name.trim()} </h5>
 						<div class="header__cart-item-price-wrap">
 							<span class="header__cart-item-price">Giá: ${$formatter.format(
-					cart.price,
-				)} </span>
+								cart.price,
+							)} </span>
 							<span class="header__cart-item-multiply">x</span>
 							<span class="header__cart-item-qnt">${cart.quantity}</span>
 						</div>
@@ -121,7 +130,7 @@ function renderCartItemsList(carts) {
 }
 
 function deleteCart(index) {
-	const ok = confirm('xóa giỏ hàng')
+	const ok = confirm("xóa giỏ hàng");
 	if (!ok) return;
 	const carts = getCart();
 	carts.splice(index, 1);
